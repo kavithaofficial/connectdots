@@ -8,17 +8,22 @@ export default function Navbar({ variant = 'light' }: { variant?: 'light' | 'dar
   const [connectionCount, setConnectionCount] = useState(0);
 
   useEffect(() => {
-    const session = localStorage.getItem('connectdots-session');
-    if (session) {
-      try {
-        setUser(JSON.parse(session));
-      } catch {
-        setUser(null);
-      }
-    }
+    try {
+      const session = localStorage.getItem('connectdots-session');
+      const savedUser = localStorage.getItem('connectdots-user');
 
-    const connections = JSON.parse(localStorage.getItem('connectdots-connections') || '[]');
-    setConnectionCount(connections.filter((item: { status?: string }) => item.status === 'pending').length);
+      if (session) {
+        setUser(JSON.parse(session));
+      } else if (savedUser) {
+        setUser(JSON.parse(savedUser));
+      }
+
+      const connections = JSON.parse(localStorage.getItem('connectdots-connections') || '[]');
+      setConnectionCount(connections.filter((item: { status?: string }) => item.status === 'pending').length);
+    } catch {
+      setUser(null);
+      setConnectionCount(0);
+    }
   }, []);
 
   const navItems = [

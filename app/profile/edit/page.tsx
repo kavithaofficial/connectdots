@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -15,15 +16,26 @@ export default function ProfileEditPage() {
   });
 
   useEffect(() => {
-    const session = JSON.parse(localStorage.getItem('connectdots-session') || '{}');
-    setForm({
-      name: session.name || 'Ava Thompson',
-      title: session.role || 'Product Designer',
-      bio: session.bio || 'Building products that help people collaborate better and grow faster.',
-      city: session.city || 'New York',
-      portfolio: session.portfolio || 'https://portfolio.example.com',
-      skills: session.skills || 'Product Strategy, UX, AI, Research',
-    });
+    try {
+      const session = JSON.parse(localStorage.getItem('connectdots-session') || '{}');
+      setForm({
+        name: session.name || 'Ava Thompson',
+        title: session.role || 'Product Designer',
+        bio: session.bio || 'Building products that help people collaborate better and grow faster.',
+        city: session.city || 'New York',
+        portfolio: session.portfolio || 'https://portfolio.example.com',
+        skills: Array.isArray(session.skills) ? session.skills.join(', ') : session.skills || 'Product Strategy, UX, AI, Research',
+      });
+    } catch {
+      setForm({
+        name: 'Ava Thompson',
+        title: 'Product Designer',
+        bio: 'Building products that help people collaborate better and grow faster.',
+        city: 'New York',
+        portfolio: 'https://portfolio.example.com',
+        skills: 'Product Strategy, UX, AI, Research',
+      });
+    }
   }, []);
 
   const updateField = (field: string, value: string) => {
@@ -32,12 +44,16 @@ export default function ProfileEditPage() {
 
   const saveProfile = () => {
     const nextSession = {
-      ...JSON.parse(localStorage.getItem('connectdots-session') || '{}'),
+      ...(JSON.parse(localStorage.getItem('connectdots-session') || '{}')),
       ...form,
+      role: form.title,
+      city: form.city,
+      portfolio: form.portfolio.split(',').map((item) => item.trim()).filter(Boolean),
       skills: form.skills.split(',').map((item) => item.trim()).filter(Boolean),
     };
 
     localStorage.setItem('connectdots-session', JSON.stringify(nextSession));
+    localStorage.setItem('connectdots-user', JSON.stringify(nextSession));
     router.push('/profile');
   };
 

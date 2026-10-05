@@ -1,28 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-
-type Project = {
-  title: string;
-  stage: string;
-  summary: string;
-  roles: string;
-  members: number;
-  lookingFor: number;
-};
+import { useEffect, useState } from 'react';
 
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
 
   useEffect(() => {
-    const storedProjects = JSON.parse(localStorage.getItem('connectdots-projects') || '[]');
-    const combined = [...storedProjects, ...defaultProjects];
-    setProjects(combined);
+    try {
+      const storedProjects = JSON.parse(localStorage.getItem('connectdots-projects') || '[]');
+      setProjects([...storedProjects, ...defaultProjects]);
+    } catch {
+      setProjects([...defaultProjects]);
+    }
   }, []);
 
-  const defaultProjects: Project[] = [
+  const defaultProjects = [
     {
       title: 'AI Career Coach',
       stage: 'Early stage',
@@ -51,7 +44,6 @@ export default function ProjectsPage() {
 
   return (
     <main className="min-h-screen bg-slate-100 text-slate-900">
-      <Navbar />
       <div className="container py-10">
         <div className="mb-8 flex items-center justify-between gap-4">
           <div>

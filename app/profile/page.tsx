@@ -1,7 +1,6 @@
 'use client';
 
 import Navbar from '@/components/Navbar';
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 export default function ProfilePage() {
@@ -11,14 +10,18 @@ export default function ProfilePage() {
     const session = localStorage.getItem('connectdots-session');
     const savedUser = localStorage.getItem('connectdots-user');
 
-    if (session) {
-      setUser(JSON.parse(session));
-      return;
-    }
+    try {
+      if (session) {
+        setUser(JSON.parse(session));
+        return;
+      }
 
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-      return;
+      if (savedUser) {
+        setUser(JSON.parse(savedUser));
+        return;
+      }
+    } catch {
+      // fall through to demo user if the saved data is malformed
     }
 
     setUser({
@@ -46,9 +49,7 @@ export default function ProfilePage() {
                 <div className="text-sm text-slate-500">{user?.role || 'Product Strategist'}</div>
               </div>
             </div>
-            <Link href="/profile/edit" className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700">
-              Edit profile
-            </Link>
+            <button className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white">Edit profile</button>
           </div>
 
           <p className="mt-6 max-w-2xl text-slate-600">

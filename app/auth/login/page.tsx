@@ -18,14 +18,18 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      if (!isSupabaseConfigured) {
-        localStorage.setItem('connectdots-session', JSON.stringify({
+      if (!isSupabaseConfigured || !supabase) {
+        const demoUser = {
           name: 'Demo User',
           role: 'Product Strategist',
           bio: 'Builder, operator, and product-minded collaborator.',
           skills: ['Product Strategy', 'AI', 'UX'],
           city: 'Bengaluru',
-        }));
+          email,
+        };
+
+        localStorage.setItem('connectdots-session', JSON.stringify(demoUser));
+        localStorage.setItem('connectdots-user', JSON.stringify(demoUser));
         router.push('/profile');
         return;
       }
