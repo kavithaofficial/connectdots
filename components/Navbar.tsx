@@ -5,12 +5,16 @@ import { useEffect, useState } from 'react';
 
 export default function Navbar() {
   const [user, setUser] = useState<{ name?: string; role?: string } | null>(null);
+  const [connectionCount, setConnectionCount] = useState(0);
 
   useEffect(() => {
     const session = localStorage.getItem('connectdots-session');
     if (session) {
       setUser(JSON.parse(session));
     }
+
+    const connections = JSON.parse(localStorage.getItem('connectdots-connections') || '[]');
+    setConnectionCount(connections.length);
   }, []);
 
   const navItems = [
@@ -35,6 +39,10 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-3">
+          <Link href="/notifications" className="relative rounded-full bg-slate-100 p-2 hover:bg-slate-200">
+            <span className="text-xl">🔔</span>
+            {connectionCount > 0 && <span className="absolute top-0 right-0 rounded-full bg-red-500 text-xs text-white w-5 h-5 flex items-center justify-center">{connectionCount}</span>}
+          </Link>
           {user ? (
             <>
               <Link href="/profile" className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
