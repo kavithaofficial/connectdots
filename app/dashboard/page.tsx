@@ -1,7 +1,33 @@
+'use client';
+
 import Navbar from '@/components/Navbar';
 import { matches, projectFeed, notifications, quickStats } from '@/lib/mock-data';
+import { useEffect, useState } from 'react';
 
 export default function DashboardPage() {
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const storedSession = localStorage.getItem('connectdots-session');
+    const savedUser = localStorage.getItem('connectdots-user');
+
+    if (storedSession) {
+      setUser(JSON.parse(storedSession));
+      return;
+    }
+
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+      return;
+    }
+
+    setUser({
+      name: 'Demo User',
+      role: 'Product Strategist',
+      email: 'demo@connectdots.com',
+    });
+  }, []);
+
   return (
     <main className="min-h-screen bg-slate-100 text-slate-900">
       <Navbar />
@@ -10,6 +36,7 @@ export default function DashboardPage() {
           <div className="mb-6 rounded-2xl bg-slate-900 p-4 text-white">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Profile score</p>
             <div className="mt-3 text-3xl font-black">88</div>
+            <div className="mt-2 text-sm text-slate-300">{user?.name || 'Demo User'}</div>
           </div>
           <nav className="space-y-2 text-sm text-slate-600">
             {['Overview', 'Matches', 'Projects', 'Messages', 'Saved', 'Settings'].map((item) => (
@@ -21,6 +48,18 @@ export default function DashboardPage() {
         </aside>
 
         <div className="space-y-8">
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">Welcome back</p>
+                <h1 className="mt-2 text-4xl font-black">{user?.name || 'Demo User'}</h1>
+              </div>
+              <div className="rounded-xl bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700">
+                {user?.role || 'Product Strategist'}
+              </div>
+            </div>
+          </section>
+
           <section className="grid gap-4 md:grid-cols-4">
             {quickStats.map((stat) => (
               <div key={stat.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
