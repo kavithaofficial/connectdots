@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 export default function Navbar() {
-  const [user, setUser] = useState<{ name?: string; role?: string } | null>(null);
+  const [user, setUser] = useState<{ name?: string; role?: string; skills?: string[] } | null>(null);
   const [connectionCount, setConnectionCount] = useState(0);
 
   useEffect(() => {
@@ -14,13 +14,14 @@ export default function Navbar() {
     }
 
     const connections = JSON.parse(localStorage.getItem('connectdots-connections') || '[]');
-    setConnectionCount(connections.length);
+    setConnectionCount(connections.filter((item: { status?: string }) => item.status === 'pending').length);
   }, []);
 
   const navItems = [
     { href: '/', label: 'Home' },
     { href: '/discover', label: 'Discover' },
     { href: '/projects', label: 'Projects' },
+    { href: '/connections', label: 'Connections' },
     { href: '/messages', label: 'Messages' },
     { href: '/pricing', label: 'Pricing' },
   ];
@@ -41,8 +42,9 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           <Link href="/notifications" className="relative rounded-full bg-slate-100 p-2 hover:bg-slate-200">
             <span className="text-xl">🔔</span>
-            {connectionCount > 0 && <span className="absolute top-0 right-0 rounded-full bg-red-500 text-xs text-white w-5 h-5 flex items-center justify-center">{connectionCount}</span>}
+            {connectionCount > 0 && <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">{connectionCount}</span>}
           </Link>
+
           {user ? (
             <>
               <Link href="/profile" className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
