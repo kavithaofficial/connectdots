@@ -33,7 +33,7 @@ const testimonials = [
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-slate-950 text-white">
-      <Navbar />
+      <Navbar variant="dark" />
 
       <section className="container grid items-center gap-10 py-20 lg:grid-cols-[1.1fr_0.9fr]">
         <div>

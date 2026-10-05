@@ -1,6 +1,7 @@
 'use client';
 
 import Navbar from '@/components/Navbar';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 export default function ProfilePage() {
@@ -45,7 +46,9 @@ export default function ProfilePage() {
                 <div className="text-sm text-slate-500">{user?.role || 'Product Strategist'}</div>
               </div>
             </div>
-            <button className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white">Edit profile</button>
+            <Link href="/profile/edit" className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700">
+              Edit profile
+            </Link>
           </div>
 
           <p className="mt-6 max-w-2xl text-slate-600">
