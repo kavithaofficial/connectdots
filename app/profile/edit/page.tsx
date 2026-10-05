@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { getStoredUser, saveStoredUser } from '@/lib/storage';
 
 export default function ProfileEditPage() {
   const router = useRouter();
@@ -16,26 +16,15 @@ export default function ProfileEditPage() {
   });
 
   useEffect(() => {
-    try {
-      const session = JSON.parse(localStorage.getItem('connectdots-session') || '{}');
-      setForm({
-        name: session.name || 'Ava Thompson',
-        title: session.role || 'Product Designer',
-        bio: session.bio || 'Building products that help people collaborate better and grow faster.',
-        city: session.city || 'New York',
-        portfolio: session.portfolio || 'https://portfolio.example.com',
-        skills: Array.isArray(session.skills) ? session.skills.join(', ') : session.skills || 'Product Strategy, UX, AI, Research',
-      });
-    } catch {
-      setForm({
-        name: 'Ava Thompson',
-        title: 'Product Designer',
-        bio: 'Building products that help people collaborate better and grow faster.',
-        city: 'New York',
-        portfolio: 'https://portfolio.example.com',
-        skills: 'Product Strategy, UX, AI, Research',
-      });
-    }
+    const user = getStoredUser();
+    setForm({
+      name: user.name || 'Ava Thompson',
+      title: user.role || 'Product Designer',
+      bio: user.bio || 'Building products that help people collaborate better and grow faster.',
+      city: user.location || user.city || 'New York',
+      portfolio: Array.isArray(user.portfolio) ? user.portfolio.join(', ') : user.portfolio || 'https://portfolio.example.com',
+      skills: Array.isArray(user.skills) ? user.skills.join(', ') : user.skills || 'Product Strategy, UX, AI, Research',
+    });
   }, []);
 
   const updateField = (field: string, value: string) => {
@@ -44,16 +33,22 @@ export default function ProfileEditPage() {
 
   const saveProfile = () => {
     const nextSession = {
-      ...(JSON.parse(localStorage.getItem('connectdots-session') || '{}')),
+      ...getStoredUser(),
       ...form,
       role: form.title,
       city: form.city,
-      portfolio: form.portfolio.split(',').map((item) => item.trim()).filter(Boolean),
-      skills: form.skills.split(',').map((item) => item.trim()).filter(Boolean),
+      location: form.city,
+      portfolio: form.portfolio
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean),
+      skills: form.skills
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean),
     };
 
-    localStorage.setItem('connectdots-session', JSON.stringify(nextSession));
-    localStorage.setItem('connectdots-user', JSON.stringify(nextSession));
+    saveStoredUser(nextSession);
     router.push('/profile');
   };
 

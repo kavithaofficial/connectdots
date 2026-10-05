@@ -2,45 +2,14 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { getStoredProjects, saveStoredProjects } from '@/lib/storage';
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<any[]>([]);
 
   useEffect(() => {
-    try {
-      const storedProjects = JSON.parse(localStorage.getItem('connectdots-projects') || '[]');
-      setProjects([...storedProjects, ...defaultProjects]);
-    } catch {
-      setProjects([...defaultProjects]);
-    }
+    setProjects(getStoredProjects());
   }, []);
-
-  const defaultProjects = [
-    {
-      title: 'AI Career Coach',
-      stage: 'Early stage',
-      summary: 'Building a personalized guidance platform for students and early professionals.',
-      roles: 'Product, AI, UX, Growth',
-      members: 5,
-      lookingFor: 3,
-    },
-    {
-      title: 'Creator Commerce',
-      stage: 'Prototype',
-      summary: 'Creating a platform for creators to monetize communities and drive audience trust.',
-      roles: 'Marketing, Design, Frontend, Data',
-      members: 4,
-      lookingFor: 2,
-    },
-    {
-      title: 'Skill Exchange Network',
-      stage: 'Research',
-      summary: 'A collaborative platform that helps people discover complementary skills and opportunities.',
-      roles: 'Research, Product, Community, Design',
-      members: 3,
-      lookingFor: 2,
-    },
-  ];
 
   return (
     <main className="min-h-screen bg-slate-100 text-slate-900">
@@ -55,7 +24,7 @@ export default function ProjectsPage() {
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {projects.map((project) => (
-            <div key={`${project.title}-${project.stage}`} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
+            <div key={`${project.title}-${project.stage}-${project.id || 'default'}`} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
               <div className="flex items-center justify-between">
                 <div className="font-bold text-xl">{project.title}</div>
                 <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-700">{project.stage}</span>

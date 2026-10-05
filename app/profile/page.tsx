@@ -1,37 +1,15 @@
 'use client';
 
 import Navbar from '@/components/Navbar';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { getStoredUser } from '@/lib/storage';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    const session = localStorage.getItem('connectdots-session');
-    const savedUser = localStorage.getItem('connectdots-user');
-
-    try {
-      if (session) {
-        setUser(JSON.parse(session));
-        return;
-      }
-
-      if (savedUser) {
-        setUser(JSON.parse(savedUser));
-        return;
-      }
-    } catch {
-      // fall through to demo user if the saved data is malformed
-    }
-
-    setUser({
-      name: 'Demo User',
-      role: 'Product Strategist',
-      bio: 'Helping founders and creators turn early ideas into real opportunities.',
-      skills: ['Product Strategy', 'UX Research', 'AI', 'Growth Hacking'],
-      portfolio: ['Portfolio', 'GitHub', 'LinkedIn'],
-      location: 'Bengaluru',
-    });
+    setUser(getStoredUser());
   }, []);
 
   return (
@@ -49,7 +27,9 @@ export default function ProfilePage() {
                 <div className="text-sm text-slate-500">{user?.role || 'Product Strategist'}</div>
               </div>
             </div>
-            <button className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white">Edit profile</button>
+            <Link href="/profile/edit" className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700">
+              Edit profile
+            </Link>
           </div>
 
           <p className="mt-6 max-w-2xl text-slate-600">

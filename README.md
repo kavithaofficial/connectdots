@@ -23,15 +23,16 @@ The frontend MVP is implemented as a polished Next.js app with:
 - admin dashboard
 - profile and editing flow
 - notification-aware navigation
+- resilient local persistence for demo/user flows
 
 ## Tech stack
 - Next.js 14
 - TypeScript
 - Tailwind CSS
-- Supabase (planned for auth + database)
-- Vercel (planned for deployment)
+- Supabase (configured and ready for final real auth/data integration)
+- Vercel (deployment target)
 
-## Supabase setup (next phase)
+## Supabase setup
 1. Create a Supabase project.
 2. Copy the project URL and anon key into `.env.local`.
 3. Run the SQL from `supabase/schema.sql` in the Supabase SQL editor.
@@ -45,15 +46,17 @@ cp .env.example .env.local
 
 Then update the values with your Supabase credentials.
 
+## Local demo mode
+If Supabase is not configured yet, the app automatically falls back to resilient local demo data so the product still works during development.
+
 ## Project architecture
 - `app/` contains route-based screens
 - `components/` contains reusable UI blocks
 - `lib/` contains shared logic and Supabase client configuration
 - `supabase/schema.sql` stores database structure for users, projects, and collaboration records
 
-## Next milestones
+## Final milestones
 - add real auth with Supabase
-- connect profile data to database
-- store projects and connection requests in Supabase
+- connect profile, projects, and connection records to live data
 - deploy to Vercel
-- write final presentation and project report
+- document the project and prepare the final presentation

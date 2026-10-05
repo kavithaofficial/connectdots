@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { saveStoredProjects } from '@/lib/storage';
 
 export default function NewProjectPage() {
   const router = useRouter();
@@ -20,13 +21,18 @@ export default function NewProjectPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const existing = JSON.parse(localStorage.getItem('connectdots-projects') || '[]');
-      const newProject = { ...form, id: Date.now() };
-      localStorage.setItem('connectdots-projects', JSON.stringify([newProject, ...existing]));
-    } catch {
-      localStorage.setItem('connectdots-projects', JSON.stringify([{ ...form, id: Date.now() } ]));
-    }
+
+    const existing = JSON.parse(localStorage.getItem('connectdots-projects') || '[]');
+    const nextProject = {
+      ...form,
+      id: Date.now(),
+      summary: form.description,
+      members: 1,
+      lookingFor: 1,
+    };
+
+    const nextProjects = [nextProject, ...existing];
+    saveStoredProjects(nextProjects);
     router.push('/projects');
   };
 

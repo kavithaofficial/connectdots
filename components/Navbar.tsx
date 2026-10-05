@@ -2,28 +2,18 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { getStoredUser } from '@/lib/storage';
 
 export default function Navbar({ variant = 'light' }: { variant?: 'light' | 'dark' }) {
   const [user, setUser] = useState<{ name?: string; role?: string; skills?: string[] } | null>(null);
   const [connectionCount, setConnectionCount] = useState(0);
 
   useEffect(() => {
-    try {
-      const session = localStorage.getItem('connectdots-session');
-      const savedUser = localStorage.getItem('connectdots-user');
+    const storedUser = getStoredUser();
+    setUser(storedUser);
 
-      if (session) {
-        setUser(JSON.parse(session));
-      } else if (savedUser) {
-        setUser(JSON.parse(savedUser));
-      }
-
-      const connections = JSON.parse(localStorage.getItem('connectdots-connections') || '[]');
-      setConnectionCount(connections.filter((item: { status?: string }) => item.status === 'pending').length);
-    } catch {
-      setUser(null);
-      setConnectionCount(0);
-    }
+    const connections = JSON.parse(localStorage.getItem('connectdots-connections') || '[]');
+    setConnectionCount(connections.filter((item: { status?: string }) => item.status === 'pending').length);
   }, []);
 
   const navItems = [
