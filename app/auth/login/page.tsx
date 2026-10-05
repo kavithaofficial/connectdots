@@ -3,94 +3,93 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ email: '', password: '' });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleChange = (field: 'email' | 'password', value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleSubmit = (event: FormEvent) => {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError('');
+    setIsLoading(true);
 
-    const savedUser = JSON.parse(localStorage.getItem('connectdots-user') || 'null');
-    const demoUser = {
-      name: 'Demo User',
-      email: 'demo@connectdots.com',
-      password: 'demo123',
-      role: 'Product Strategist',
-      location: 'Bengaluru',
-    };
+    try {
+      if (!isSupabaseConfigured) {
+        localStorage.setItem('connectdots-session', JSON.stringify({
+          name: 'Demo User',
+          role: 'Product Strategist',
+          bio: 'Builder, operator, and product-minded collaborator.',
+          skills: ['Product Strategy', 'AI', 'UX'],
+          city: 'Bengaluru',
+        }));
+        router.push('/profile');
+        return;
+      }
 
-    const validUser = savedUser || demoUser;
-
-    if (
-      (validUser.email === form.email && validUser.password === form.password) ||
-      (form.email === 'demo@connectdots.com' && form.password === 'demo123')
-    ) {
-      localStorage.setItem(
-        'connectdots-session',
-        JSON.stringify({
-          name: validUser.name,
-          email: validUser.email,
-          role: validUser.role,
-          location: validUser.location,
-        })
-      );
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) throw signInError;
       router.push('/dashboard');
-      return;
+    } catch (err: any) {
+      setError(err?.message || 'Unable to sign in. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
-
-    setError('No account found. Use demo@connectdots.com / demo123 or create one.');
-  };
+  }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 p-6">
-      <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-soft">
-        <div className="mb-8 text-center">
-          <div className="text-3xl font-black text-slate-900">ConnectDots</div>
-          <p className="mt-2 text-sm text-slate-500">Welcome back</p>
+    <main className="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-12 text-white">
+      <div className="w-full max-w-md rounded-[28px] border border-slate-800 bg-slate-900 p-8 shadow-2xl shadow-blue-950/20">
+        <div className="mb-8">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-300">Welcome back</p>
+          <h1 className="mt-3 text-4xl font-black">Login</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">Email</label>
+            <label className="mb-2 block text-sm text-slate-300">Email</label>
             <input
               type="email"
-              value={form.email}
-              onChange={(e) => handleChange('email', e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-blue-500"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-blue-500"
               placeholder="you@example.com"
+              required
             />
           </div>
+
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">Password</label>
+            <label className="mb-2 block text-sm text-slate-300">Password</label>
             <input
               type="password"
-              value={form.password}
-              onChange={(e) => handleChange('password', e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-blue-500"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-blue-500"
               placeholder="••••••••"
+              required
             />
           </div>
 
-          {error && <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
+          {error && <p className="text-sm text-red-400">{error}</p>}
 
-          <button type="submit" className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700">
-            Sign in
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-500 disabled:opacity-70"
+          >
+            {isLoading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-slate-500">
-          Don’t have an account? <Link href="/auth/signup" className="font-semibold text-blue-600">Create one</Link>
-        </div>
-
-        <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-center text-xs text-slate-600">
-          Demo login: demo@connectdots.com / demo123
-        </div>
+        <p className="mt-6 text-center text-sm text-slate-400">
+          Need an account?{' '}
+          <Link href="/auth/signup" className="font-semibold text-blue-300 hover:text-blue-200">
+            Create one
+          </Link>
+        </p>
       </div>
     </main>
   );

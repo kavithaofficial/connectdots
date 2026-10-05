@@ -3,123 +3,119 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
-
-const emptyForm = {
-  name: '',
-  email: '',
-  password: '',
-  role: '',
-  location: '',
-};
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 
 export default function SignupPage() {
   const router = useRouter();
-  const [form, setForm] = useState(emptyForm);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const updateField = (field: keyof typeof emptyForm, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleSubmit = (event: FormEvent) => {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError('');
+    setIsLoading(true);
 
-    if (!form.name || !form.email || !form.password) {
-      setError('Please complete all required fields.');
-      return;
+    try {
+      if (!isSupabaseConfigured) {
+        localStorage.setItem('connectdots-session', JSON.stringify({
+          name,
+          role: 'Founder',
+          bio: 'Building a product with a strong founder mindset.',
+          skills: ['Product', 'Startup', 'Execution'],
+          city: 'Your city',
+        }));
+        router.push('/profile');
+        return;
+      }
+
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
+        },
+      });
+
+      if (signUpError) throw signUpError;
+
+      if (data.user) {
+        router.push('/dashboard');
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Unable to create account. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
-
-    const userProfile = {
-      ...form,
-      bio: 'Helping founders and creators turn early ideas into real opportunities.',
-      skills: ['Product', 'AI', 'Growth', 'Strategy'],
-      interests: ['Startups', 'Community', 'Education'],
-      portfolio: ['Portfolio', 'GitHub', 'LinkedIn'],
-    };
-
-    localStorage.setItem('connectdots-user', JSON.stringify(userProfile));
-    localStorage.setItem(
-      'connectdots-session',
-      JSON.stringify({
-        name: userProfile.name,
-        email: userProfile.email,
-        role: userProfile.role,
-        location: userProfile.location,
-      })
-    );
-
-    router.push('/dashboard');
-  };
+  }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 p-6">
-      <div className="w-full max-w-xl rounded-3xl border border-slate-200 bg-white p-8 shadow-soft">
-        <div className="mb-8 text-center">
-          <div className="text-3xl font-black text-slate-900">Join ConnectDots</div>
-          <p className="mt-2 text-sm text-slate-500">Build your network and discover meaningful collaborations.</p>
+    <main className="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-12 text-white">
+      <div className="w-full max-w-md rounded-[28px] border border-slate-800 bg-slate-900 p-8 shadow-2xl shadow-blue-950/20">
+        <div className="mb-8">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-300">Join ConnectDots</p>
+          <h1 className="mt-3 text-4xl font-black">Create account</h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="grid gap-5 md:grid-cols-2">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">Full name</label>
+            <label className="mb-2 block text-sm text-slate-300">Full name</label>
             <input
-              value={form.name}
-              onChange={(e) => updateField('name', e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-blue-500"
-              placeholder="Your name"
+              type="text"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-blue-500"
+              placeholder="Aarav Sharma"
+              required
             />
           </div>
+
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">Email</label>
+            <label className="mb-2 block text-sm text-slate-300">Email</label>
             <input
               type="email"
-              value={form.email}
-              onChange={(e) => updateField('email', e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-blue-500"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-blue-500"
               placeholder="you@example.com"
+              required
             />
           </div>
+
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">Role</label>
-            <input
-              value={form.role}
-              onChange={(e) => updateField('role', e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-blue-500"
-              placeholder="Product Designer"
-            />
-          </div>
-          <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">Location</label>
-            <input
-              value={form.location}
-              onChange={(e) => updateField('location', e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-blue-500"
-              placeholder="Bengaluru, India"
-            />
-          </div>
-          <div className="md:col-span-2">
-            <label className="mb-2 block text-sm font-medium text-slate-700">Password</label>
+            <label className="mb-2 block text-sm text-slate-300">Password</label>
             <input
               type="password"
-              value={form.password}
-              onChange={(e) => updateField('password', e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-blue-500"
-              placeholder="••••••••"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-blue-500"
+              placeholder="At least 6 characters"
+              minLength={6}
+              required
             />
           </div>
 
-          {error && <div className="md:col-span-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
+          {error && <p className="text-sm text-red-400">{error}</p>}
 
-          <div className="md:col-span-2">
-            <button type="submit" className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700">
-              Create account
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-500 disabled:opacity-70"
+          >
+            {isLoading ? 'Creating account...' : 'Create account'}
+          </button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-slate-500">
-          Already a member? <Link href="/auth/login" className="font-semibold text-blue-600">Log in</Link>
-        </div>
+        <p className="mt-6 text-center text-sm text-slate-400">
+          Already have an account?{' '}
+          <Link href="/auth/login" className="font-semibold text-blue-300 hover:text-blue-200">
+            Log in
+          </Link>
+        </p>
       </div>
     </main>
   );
